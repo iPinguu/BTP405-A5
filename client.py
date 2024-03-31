@@ -38,6 +38,5 @@ def start_Client(host='127.0.0.1', port=65432):
         except Exception as e:
             print(f'[CLIENT] Something went wrong, see error: \n"{e}"')
 
-
 if __name__ == '__main__':
     start_Client()
