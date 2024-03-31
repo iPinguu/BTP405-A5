@@ -14,11 +14,12 @@ Must Have the following installed
 - Python
 
 # Instructions to run program
-- Clone the repo
-`git clone https://github.com/iPinguu/PHR-Prj1.git`
-`cd PHR-Prj1 `
+- Clone the repo: `git clone https://github.com/iPinguu/PHR-Prj1.git`
+- CD into dir: `cd PHR-Prj1 `
 
-open two separate terminals, one for the Server.py and one for the Client.py
+- Open two separate terminals
+    - one for the Server.py
+    - one for the Client.py
 
 Execute Server.py first, then execute the Client.py
 
