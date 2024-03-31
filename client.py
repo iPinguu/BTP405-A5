@@ -33,7 +33,13 @@ def start_Client(host='127.0.0.1', port=65432):
                 # Recieve ACK from server
                 data = clientSock.recv(1024)
                 
-                print(f'[Client] Message from Server: "{data.decode()}"')
+                if data:
+                    print(f'[CLIENT] Message from Server: "{data.decode()}"')
+                else:
+                    print(f'[CLIENT] Connection Terminated by Client')
+                    break
+            
+            clientSock.close()
         
         except Exception as e:
             print(f'[CLIENT] Something went wrong, see error: \n"{e}"')

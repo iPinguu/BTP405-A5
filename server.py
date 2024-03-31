@@ -29,13 +29,14 @@ def acceptConn(theConnetion : socket):
         
             # Start receiving data from client    
             data = conn.recv(1024)                
-            if not data or data == "quit":
+            if not data or (data.decode('utf-8') == "quit"):
                 break
-
-            # TODO: Implement QUIT logic. 
         
             # Send back data to client
             conn.sendall(data)
+
+
+    conn.close()
 
 def start_Server(host='127.0.0.1', port=65432):
 
@@ -46,26 +47,30 @@ def start_Server(host='127.0.0.1', port=65432):
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSock:
     
+        # Avoids [Errno 48] when running server after immediately shutting it down
+        serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
         # Binds socket 
         serverSock.bind((host, port))
         print(f'[SERVER] Started, listening on [{host} : {port}]')
 
         
-        while(CURR_CONNS <= MAX_CONN):
+        while True:
             
-            # Listens for connection
-            serverSock.listen()
+            while CURR_CONNS <= MAX_CONN:
             
-            if(CURR_CONNS == MAX_CONN):
-                tempConn, tempAddr = serverSock.accept()
-                with tempConn:
-                    print(f'[Server Log] Client {tempAddr} attempted to connect, but server is full')
-                    tempConn.sendall(b'[Server] No more spare connections, try again later.')
-            else:
-                listOfConns.append(threading.Thread(target=acceptConn(serverSock)))
-                CURR_CONNS = CURR_CONNS + 1
-                listOfConns[CURR_CONNS - 1].start()
-                # listOfConns[CURR_CONNS - 1].join()
+                # Listens for connection
+                serverSock.listen()
+                
+                if(CURR_CONNS == MAX_CONN):
+                    tempConn, tempAddr = serverSock.accept()
+                    with tempConn:
+                        print(f'[Server Log] Client {tempAddr} attempted to connect, but server is full')
+                        tempConn.sendall(b'[Server] No more spare connections, try again later.')
+                else:
+                    listOfConns.append(threading.Thread(target=acceptConn(serverSock)))
+                    CURR_CONNS = CURR_CONNS + 1
+                    listOfConns[CURR_CONNS - 1].start()
 
 if __name__ == '__main__':
     start_Server()
