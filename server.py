@@ -68,7 +68,7 @@ def start_Server(host='127.0.0.1', port=65432):
                         print(f'[Server Log] Client {tempAddr} attempted to connect, but server is full')
                         tempConn.sendall(b'[Server] No more spare connections, try again later.')
                 else:
-                    listOfConns.append(threading.Thread(target=acceptConn(serverSock)))
+                    listOfConns.append(threading.Thread(target=acceptConn(serverSock))) # TODO: not working as intended
                     CURR_CONNS = CURR_CONNS + 1
                     listOfConns[CURR_CONNS - 1].start()
 
