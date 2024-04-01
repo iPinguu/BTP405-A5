@@ -18,31 +18,28 @@ import socket
 import threading
 
 
-def acceptConn(theConnetion : socket):
+def acceptConn(clientConn, ClientAddress):
+    """ Accepts connection and handles connection related tasks here """
     
-    # Accepts a connection
-    conn, addr = theConnetion.accept()
-    with conn:
-        print(f'[SERVER] Connected by {addr}')
+    with clientConn:
+        print(f'[SERVER] Connected by {ClientAddress}')
     
         while True:
         
             # Start receiving data from client    
-            data = conn.recv(1024)                
-            if not data or (data.decode('utf-8') == "quit"):
+            data = clientConn.recv(1024).decode('utf-8')
+            if not data or data == "quit":
                 break
         
             # Send back data to client
-            conn.sendall(data)
+            clientConn.sendall(data)
 
-
-    conn.close()
+        print(f'[SERVER] Connection with {ClientAddress} closed')
 
 def start_Server(host='127.0.0.1', port=65432):
+    """ Starts Socket server """
 
     MAX_CONN = 5
-    CURR_CONNS = 0
-    
     listOfConns = []
     
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSock:
@@ -56,21 +53,25 @@ def start_Server(host='127.0.0.1', port=65432):
 
         
         while True:
-            
-            while CURR_CONNS <= MAX_CONN:
-            
+            if len(listOfConns) <= MAX_CONN:
                 # Listens for connection
                 serverSock.listen()
+                        
+                # Accepts a connection
+                conn, addr = serverSock.accept()
                 
-                if(CURR_CONNS == MAX_CONN):
-                    tempConn, tempAddr = serverSock.accept()
-                    with tempConn:
-                        print(f'[Server Log] Client {tempAddr} attempted to connect, but server is full')
-                        tempConn.sendall(b'[Server] No more spare connections, try again later.')
-                else:
-                    listOfConns.append(threading.Thread(target=acceptConn(serverSock))) # TODO: not working as intended
-                    CURR_CONNS = CURR_CONNS + 1
-                    listOfConns[CURR_CONNS - 1].start()
+                # Spawn connection Thread
+                conn.sendall(b"Connected")
+                currentThr = threading.Thread(target=acceptConn, args=(conn, addr)) # TODO: not working as intended
+                currentThr.start()
+                
+                # Append to list of threads to keep track of current connections
+                listOfConns.append(currentThr) # TODO: implement remove-threads-from-list-when-finished logic
+            else:                
+                print(f'[Server Log] Client {addr} attempted to connect, but server is full')
+                conn.sendall(b'full')
+                # conn.close() # rejects connection
+                break
 
 if __name__ == '__main__':
     start_Server()

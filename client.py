@@ -25,19 +25,26 @@ def start_Client(host='127.0.0.1', port=65432):
             clientSock.connect((host, port))
 
             while True:
-                # Ask client to send a message to server
-                print('[CLIENT] Enter your message for the server: ')
-                x = input()
-                clientSock.sendall(x.encode('utf-8'))
                 
-                # Recieve ACK from server
-                data = clientSock.recv(1024)
-                
-                if data:
-                    print(f'[CLIENT] Message from Server: "{data.decode()}"')
-                else:
-                    print(f'[CLIENT] Connection Terminated by Client')
-                    break
+                    serverStatus = clientSock.recv(1024).decode('utf-8')
+                    
+                    # checks first if server is full
+                    
+                    # Update: doesnt work as expected, doesnt get triggered when server is actually full
+                    if serverStatus == "full":
+                        print(f"[CLIENT] Message from Server: '{serverStatus}'")
+                        break
+                    
+                    # Ask client to send a message to server
+                    print('[CLIENT] Enter your message for the server: ')
+                    x = input()
+                    clientSock.sendall(x.encode('utf-8'))
+
+                    if serverStatus:
+                        print(f"[CLIENT] Message from Server: '{serverStatus.decode('utf-8')}'")
+                    else:
+                        print(f'[CLIENT] Connection Terminated by Client')
+                        break
             
             clientSock.close()
         
